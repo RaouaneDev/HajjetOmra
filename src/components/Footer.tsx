@@ -51,14 +51,17 @@ const Footer: React.FC = () => {
           <div>
             <h4 className="text-lg font-semibold mb-4">Suivez-nous</h4>
             <div className="flex space-x-4">
-              <a href="#" className="text-2xl hover:text-secondary transition-colors">
-                <FaFacebook />
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-yellow-light hover:text-primary">
+                <span className="sr-only">Facebook</span>
+                <FaFacebook className="text-xl" />
               </a>
-              <a href="#" className="text-2xl hover:text-secondary transition-colors">
-                <FaInstagram />
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-yellow-light hover:text-primary">
+                <span className="sr-only">Twitter</span>
+                <FaInstagram className="text-xl" />
               </a>
-              <a href="#" className="text-2xl hover:text-secondary transition-colors">
-                <FaWhatsapp />
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-yellow-light hover:text-primary">
+                <span className="sr-only">Instagram</span>
+                <FaWhatsapp className="text-xl" />
               </a>
             </div>
           </div>

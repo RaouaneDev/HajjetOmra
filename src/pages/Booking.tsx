@@ -53,7 +53,7 @@ const Booking: React.FC = () => {
       urlWithParams.searchParams.append('package', selectedPackage?.name || '');
       urlWithParams.searchParams.append('price', selectedPackage?.price || '');
 
-      const response = await fetch(urlWithParams.toString(), {
+      await fetch(urlWithParams.toString(), {
         method: 'GET',
         mode: 'no-cors'
       });
