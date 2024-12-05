@@ -96,7 +96,7 @@ const Booking: React.FC = () => {
       // Construction de l'URL avec les paramètres
       const urlWithParams = `${GOOGLE_SCRIPT_URL}?${dataToSend.toString()}`;
       
-      const response = await fetch(urlWithParams, {
+      await fetch(urlWithParams, {
         method: 'GET',
         mode: 'no-cors'
       });
