@@ -1,8 +1,20 @@
 import React, { useState, useEffect } from 'react';
 
-const Booking: React.FC = () => {
-  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4VudhVGfJJaENs-ld5N8FefoQHofngmwL-ZwJ2XJ04pO2SW-xZntCHtvzGb4RNiU0/exec';
+const packages = [
+  { id: 'omra-ramadan', name: 'Omra Ramadan - 15 jours', price: 2500 },
+  { id: 'hajj-confort', name: 'Hajj Confort - 3 semaines', price: 6500 },
+  { id: 'omra-express', name: 'Omra Express - 10 jours', price: 1800 }
+];
 
+const roomTypes = [
+  { id: 'quadruple', name: 'Chambre Quadruple', description: '4 personnes', priceCalculation: (basePrice: number) => basePrice },
+  { id: 'triple', name: 'Chambre Triple', description: '3 personnes', priceCalculation: (basePrice: number) => basePrice + (basePrice * 0.33) },
+  { id: 'double', name: 'Chambre Double', description: '2 personnes', priceCalculation: (basePrice: number) => basePrice + (basePrice * 0.50) }
+];
+
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4VudhVGfJJaENs-ld5N8FefoQHofngmwL-ZwJ2XJ04pO2SW-xZntCHtvzGb4RNiU0/exec';
+
+const Booking: React.FC = () => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -20,19 +32,8 @@ const Booking: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
-  const packages = [
-    { id: 'omra-ramadan', name: 'Omra Ramadan - 15 jours', price: 2500 },
-    { id: 'hajj-confort', name: 'Hajj Confort - 3 semaines', price: 6500 },
-    { id: 'omra-express', name: 'Omra Express - 10 jours', price: 1800 }
-  ];
-
-  const roomTypes = [
-    { id: 'quadruple', name: 'Chambre Quadruple', description: '4 personnes', priceCalculation: (basePrice: number) => basePrice },
-    { id: 'triple', name: 'Chambre Triple', description: '3 personnes', priceCalculation: (basePrice: number) => basePrice + (basePrice * 0.33) },
-    { id: 'double', name: 'Chambre Double', description: '2 personnes', priceCalculation: (basePrice: number) => basePrice + (basePrice * 0.50) }
-  ];
-
   // Calculer le prix total lorsque le forfait ou le type de chambre change
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (formData.package && formData.roomType) {
       const selectedPackage = packages.find(pkg => pkg.id === formData.package);
