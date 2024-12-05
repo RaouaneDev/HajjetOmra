@@ -116,145 +116,6 @@ const Booking: React.FC = () => {
           <h1 className="text-3xl font-bold text-center mb-8 text-primary">Réservation</h1>
           
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Nom */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-yellow-light mb-1">
-                  Prénom
-                </label>
-                <input
-                  type="text"
-                  id="firstName"
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 bg-dark-100 border border-gray-600 rounded-md focus:ring-primary focus:border-primary text-white"
-                  placeholder="Votre prénom"
-                />
-              </div>
-              <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-yellow-light mb-1">
-                  Nom
-                </label>
-                <input
-                  type="text"
-                  id="lastName"
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 bg-dark-100 border border-gray-600 rounded-md focus:ring-primary focus:border-primary text-white"
-                  placeholder="Votre nom"
-                />
-              </div>
-            </div>
-
-            {/* Adresse */}
-            <div>
-              <label htmlFor="address" className="block text-sm font-medium text-yellow-light mb-1">
-                Adresse (optionnel)
-              </label>
-              <input
-                type="text"
-                id="address"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                className="w-full px-4 py-2 bg-dark-100 border border-gray-600 rounded-md focus:ring-primary focus:border-primary text-white"
-                placeholder="Votre adresse"
-              />
-            </div>
-
-            {/* Genre et Age */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="gender" className="block text-sm font-medium text-yellow-light mb-1">
-                  Sexe
-                </label>
-                <select
-                  id="gender"
-                  name="gender"
-                  value={formData.gender}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 bg-dark-100 border border-gray-600 rounded-md focus:ring-primary focus:border-primary text-white"
-                >
-                  <option value="">Sélectionnez</option>
-                  <option value="H">Homme</option>
-                  <option value="F">Femme</option>
-                </select>
-              </div>
-              <div>
-                <label htmlFor="age" className="block text-sm font-medium text-yellow-light mb-1">
-                  Âge
-                </label>
-                <input
-                  type="number"
-                  id="age"
-                  name="age"
-                  value={formData.age}
-                  onChange={handleChange}
-                  required
-                  min="18"
-                  max="120"
-                  className="w-full px-4 py-2 bg-dark-100 border border-gray-600 rounded-md focus:ring-primary focus:border-primary text-white"
-                  placeholder="Votre âge"
-                />
-              </div>
-            </div>
-
-            {/* Nationalité */}
-            <div>
-              <label htmlFor="nationality" className="block text-sm font-medium text-yellow-light mb-1">
-                Nationalité
-              </label>
-              <input
-                type="text"
-                id="nationality"
-                name="nationality"
-                value={formData.nationality}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 bg-dark-100 border border-gray-600 rounded-md focus:ring-primary focus:border-primary text-white"
-                placeholder="Votre nationalité"
-              />
-            </div>
-
-            {/* Contact */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-yellow-light mb-1">
-                  Téléphone
-                </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 bg-dark-100 border border-gray-600 rounded-md focus:ring-primary focus:border-primary text-white"
-                  placeholder="Votre numéro"
-                />
-              </div>
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-yellow-light mb-1">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 bg-dark-100 border border-gray-600 rounded-md focus:ring-primary focus:border-primary text-white"
-                  placeholder="votre@email.com"
-                />
-              </div>
-            </div>
-
             {/* Forfait */}
             <div>
               <label htmlFor="package" className="block text-sm font-medium text-yellow-light mb-1">
@@ -293,7 +154,7 @@ const Booking: React.FC = () => {
                 <option value="">Sélectionnez le type de chambre</option>
                 {roomTypes.map(room => (
                   <option key={room.id} value={room.id}>
-                    {room.name} - {room.description}
+                    {room.name} ({room.description})
                   </option>
                 ))}
               </select>
@@ -308,25 +169,149 @@ const Booking: React.FC = () => {
               </div>
             )}
 
+            {/* Prénom */}
+            <div>
+              <label htmlFor="firstName" className="block text-sm font-medium text-yellow-light mb-1">
+                Prénom
+              </label>
+              <input
+                type="text"
+                id="firstName"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 bg-dark-100 border border-gray-600 rounded-md focus:ring-primary focus:border-primary text-white"
+              />
+            </div>
+
+            {/* Nom */}
+            <div>
+              <label htmlFor="lastName" className="block text-sm font-medium text-yellow-light mb-1">
+                Nom
+              </label>
+              <input
+                type="text"
+                id="lastName"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 bg-dark-100 border border-gray-600 rounded-md focus:ring-primary focus:border-primary text-white"
+              />
+            </div>
+
+            {/* Adresse */}
+            <div>
+              <label htmlFor="address" className="block text-sm font-medium text-yellow-light mb-1">
+                Adresse
+              </label>
+              <input
+                type="text"
+                id="address"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                className="w-full px-4 py-2 bg-dark-100 border border-gray-600 rounded-md focus:ring-primary focus:border-primary text-white"
+              />
+            </div>
+
+            {/* Genre */}
+            <div>
+              <label htmlFor="gender" className="block text-sm font-medium text-yellow-light mb-1">
+                Genre
+              </label>
+              <select
+                id="gender"
+                name="gender"
+                value={formData.gender}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 bg-dark-100 border border-gray-600 rounded-md focus:ring-primary focus:border-primary text-white"
+              >
+                <option value="">Sélectionnez votre genre</option>
+                <option value="male">Homme</option>
+                <option value="female">Femme</option>
+              </select>
+            </div>
+
+            {/* Âge */}
+            <div>
+              <label htmlFor="age" className="block text-sm font-medium text-yellow-light mb-1">
+                Âge
+              </label>
+              <input
+                type="number"
+                id="age"
+                name="age"
+                value={formData.age}
+                onChange={handleChange}
+                required
+                min="0"
+                max="120"
+                className="w-full px-4 py-2 bg-dark-100 border border-gray-600 rounded-md focus:ring-primary focus:border-primary text-white"
+              />
+            </div>
+
+            {/* Nationalité */}
+            <div>
+              <label htmlFor="nationality" className="block text-sm font-medium text-yellow-light mb-1">
+                Nationalité
+              </label>
+              <input
+                type="text"
+                id="nationality"
+                name="nationality"
+                value={formData.nationality}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 bg-dark-100 border border-gray-600 rounded-md focus:ring-primary focus:border-primary text-white"
+              />
+            </div>
+
+            {/* Téléphone */}
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium text-yellow-light mb-1">
+                Téléphone
+              </label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 bg-dark-100 border border-gray-600 rounded-md focus:ring-primary focus:border-primary text-white"
+              />
+            </div>
+
+            {/* Email */}
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-yellow-light mb-1">
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 bg-dark-100 border border-gray-600 rounded-md focus:ring-primary focus:border-primary text-white"
+              />
+            </div>
+
             <div className="pt-4">
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`w-full btn-primary py-3 text-lg font-semibold text-dark-100 flex items-center justify-center gap-2 ${
-                  isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                className={`w-full py-3 px-4 border border-transparent rounded-md shadow-sm text-white text-lg font-medium ${
+                  isSubmitting
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary'
                 }`}
               >
-                {isSubmitting ? (
-                  <>
-                    <svg className="animate-spin h-5 w-5 text-dark-100" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Envoi en cours...
-                  </>
-                ) : (
-                  'Envoyer la réservation'
-                )}
+                {isSubmitting ? 'Envoi en cours...' : 'Envoyer'}
               </button>
             </div>
 
