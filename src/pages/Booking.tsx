@@ -1,21 +1,26 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
+// Configuration des forfaits
 const packages = [
-  { id: 'omra-ramadan', name: 'Omra Ramadan - 15 jours', price: 2500 },
-  { id: 'hajj-confort', name: 'Hajj Confort - 3 semaines', price: 6500 },
-  { id: 'omra-express', name: 'Omra Express - 10 jours', price: 1800 }
+  { id: 'standard', name: 'Standard', price: 3000 },
+  { id: 'premium', name: 'Premium', price: 4500 },
+  { id: 'vip', name: 'VIP', price: 6000 },
 ];
 
 const roomTypes = [
-  { id: 'quadruple', name: 'Chambre Quadruple', description: '4 personnes', priceCalculation: (basePrice: number) => basePrice },
-  { id: 'triple', name: 'Chambre Triple', description: '3 personnes', priceCalculation: (basePrice: number) => basePrice + (basePrice * 0.33) },
-  { id: 'double', name: 'Chambre Double', description: '2 personnes', priceCalculation: (basePrice: number) => basePrice + (basePrice * 0.50) }
+  { id: 'quadruple', name: 'Chambre Quadruple', multiplier: 1.0, description: 'Chambre pour 4 personnes' },
+  { id: 'triple', name: 'Chambre Triple', multiplier: 1.33, description: 'Chambre pour 3 personnes' },
+  { id: 'double', name: 'Chambre Double', multiplier: 1.5, description: 'Chambre pour 2 personnes' },
 ];
 
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4VudhVGfJJaENs-ld5N8FefoQHofngmwL-ZwJ2XJ04pO2SW-xZntCHtvzGb4RNiU0/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzYibyVKJiUILauZcrVqcFm1I20S4-_DKIS2LYcog38VWrj8KDkJ_MO2OzSR87_f8X_/exec';
 
 const Booking: React.FC = () => {
-  const [formData, setFormData] = useState({
+  const navigate = useNavigate();
+  
+  // État initial du formulaire
+  const initialFormState = {
     firstName: '',
     lastName: '',
     address: '',
@@ -26,14 +31,15 @@ const Booking: React.FC = () => {
     email: '',
     package: '',
     roomType: ''
-  });
+  };
 
+  const [formData, setFormData] = useState(initialFormState);
   const [totalPrice, setTotalPrice] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [showSuccess, setShowSuccess] = useState(false);
 
-  // Calculer le prix total lorsque le forfait ou le type de chambre change
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // Calcul du prix total quand le forfait ou le type de chambre change
   useEffect(() => {
     if (formData.package && formData.roomType) {
       const selectedPackage = packages.find(pkg => pkg.id === formData.package);
@@ -41,15 +47,16 @@ const Booking: React.FC = () => {
       
       if (selectedPackage && selectedRoom) {
         const basePrice = selectedPackage.price;
-        const finalPrice = selectedRoom.priceCalculation(basePrice);
-        setTotalPrice(`${finalPrice.toFixed(2)}€`);
+        const finalPrice = Math.round(basePrice * selectedRoom.multiplier);
+        setTotalPrice(finalPrice.toString());
       }
     } else {
       setTotalPrice('');
     }
   }, [formData.package, formData.roomType]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  // Gestion des changements dans le formulaire
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -57,52 +64,50 @@ const Booking: React.FC = () => {
     }));
   };
 
+  // Soumission du formulaire
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitStatus('idle');
     
-    const selectedPackage = packages.find(pkg => pkg.id === formData.package);
-    const selectedRoom = roomTypes.find(room => room.id === formData.roomType);
-    
     try {
-      const urlWithParams = new URL(GOOGLE_SCRIPT_URL);
-      urlWithParams.searchParams.append('timestamp', new Date().toLocaleString());
-      urlWithParams.searchParams.append('firstName', formData.firstName);
-      urlWithParams.searchParams.append('lastName', formData.lastName);
-      urlWithParams.searchParams.append('address', formData.address);
-      urlWithParams.searchParams.append('gender', formData.gender);
-      urlWithParams.searchParams.append('age', formData.age);
-      urlWithParams.searchParams.append('nationality', formData.nationality);
-      urlWithParams.searchParams.append('phone', formData.phone);
-      urlWithParams.searchParams.append('email', formData.email);
-      urlWithParams.searchParams.append('package', selectedPackage?.name || '');
-      urlWithParams.searchParams.append('roomType', selectedRoom?.name || '');
-      urlWithParams.searchParams.append('totalPrice', totalPrice);
+      const selectedPackage = packages.find(pkg => pkg.id === formData.package);
+      const selectedRoom = roomTypes.find(room => room.id === formData.roomType);
+      
+      // Préparation des données à envoyer
+      const dataToSend = new URLSearchParams();
+      dataToSend.append('firstName', formData.firstName.trim());
+      dataToSend.append('lastName', formData.lastName.trim());
+      dataToSend.append('address', formData.address.trim());
+      dataToSend.append('gender', formData.gender === 'male' ? 'Homme' : 'Femme');
+      dataToSend.append('age', formData.age);
+      dataToSend.append('nationality', formData.nationality.trim());
+      dataToSend.append('phone', formData.phone.trim());
+      dataToSend.append('email', formData.email.trim());
+      dataToSend.append('formule', selectedPackage?.name || '');
+      dataToSend.append('prix_base', selectedPackage?.price.toString() || '');
+      dataToSend.append('type_chambre', selectedRoom?.name || '');
+      dataToSend.append('description_chambre', selectedRoom?.description || '');
+      dataToSend.append('prix_total', totalPrice);
 
-      await fetch(urlWithParams.toString(), {
+      // Log pour débogage
+      console.log('Données envoyées:', Object.fromEntries(dataToSend));
+
+      // Construction de l'URL avec les paramètres
+      const urlWithParams = `${GOOGLE_SCRIPT_URL}?${dataToSend.toString()}`;
+      
+      const response = await fetch(urlWithParams, {
         method: 'GET',
         mode: 'no-cors'
       });
 
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
       setSubmitStatus('success');
-      setFormData({
-        firstName: '',
-        lastName: '',
-        address: '',
-        gender: '',
-        age: '',
-        nationality: '',
-        phone: '',
-        email: '',
-        package: '',
-        roomType: ''
-      });
+      setShowSuccess(true);
+      setFormData(initialFormState);
       setTotalPrice('');
+      
     } catch (error) {
-      console.error('Erreur:', error);
+      console.error('Erreur lors de la soumission:', error);
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
@@ -110,24 +115,175 @@ const Booking: React.FC = () => {
   };
 
   return (
-    <div className="py-16 bg-dark-300 min-h-screen">
-      <div className="container-custom max-w-2xl">
-        <div className="bg-dark-200 rounded-lg shadow-xl p-8">
-          <h1 className="text-3xl font-bold text-center mb-8 text-primary">Réservation</h1>
-          
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Forfait */}
+    <div className="min-h-screen bg-dark-200 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto bg-dark-100 rounded-lg shadow-xl p-6 sm:p-8">
+        {/* Bouton retour */}
+        <button
+          onClick={() => navigate('/')}
+          className="mb-6 flex items-center text-yellow-500 hover:text-yellow-600 transition-colors duration-200"
+        >
+          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Retour à l'accueil
+        </button>
+
+        <h2 className="text-3xl font-bold text-center text-yellow-light mb-8">
+          Réservation de Voyage
+        </h2>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Informations personnelles */}
+          <div className="space-y-4">
+            <h3 className="text-xl font-semibold text-yellow-light">Informations personnelles</h3>
+            
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label htmlFor="firstName" className="block text-sm font-medium text-gray-300">
+                  Prénom
+                </label>
+                <input
+                  type="text"
+                  name="firstName"
+                  id="firstName"
+                  required
+                  value={formData.firstName}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full rounded-md border-gray-600 bg-dark-300 text-white shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="lastName" className="block text-sm font-medium text-gray-300">
+                  Nom
+                </label>
+                <input
+                  type="text"
+                  name="lastName"
+                  id="lastName"
+                  required
+                  value={formData.lastName}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full rounded-md border-gray-600 bg-dark-300 text-white shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
+                />
+              </div>
+            </div>
+
             <div>
-              <label htmlFor="package" className="block text-sm font-medium text-yellow-light mb-1">
-                Choisir votre forfait
+              <label htmlFor="address" className="block text-sm font-medium text-gray-300">
+                Adresse
+              </label>
+              <input
+                type="text"
+                name="address"
+                id="address"
+                required
+                value={formData.address}
+                onChange={handleInputChange}
+                className="mt-1 block w-full rounded-md border-gray-600 bg-dark-300 text-white shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label htmlFor="gender" className="block text-sm font-medium text-gray-300">
+                  Genre
+                </label>
+                <select
+                  name="gender"
+                  id="gender"
+                  required
+                  value={formData.gender}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full rounded-md border-gray-600 bg-dark-300 text-white shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
+                >
+                  <option value="">Sélectionnez</option>
+                  <option value="male">Homme</option>
+                  <option value="female">Femme</option>
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="age" className="block text-sm font-medium text-gray-300">
+                  Âge
+                </label>
+                <input
+                  type="number"
+                  name="age"
+                  id="age"
+                  required
+                  min="18"
+                  max="120"
+                  value={formData.age}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full rounded-md border-gray-600 bg-dark-300 text-white shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="nationality" className="block text-sm font-medium text-gray-300">
+                Nationalité
+              </label>
+              <input
+                type="text"
+                name="nationality"
+                id="nationality"
+                required
+                value={formData.nationality}
+                onChange={handleInputChange}
+                className="mt-1 block w-full rounded-md border-gray-600 bg-dark-300 text-white shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label htmlFor="phone" className="block text-sm font-medium text-gray-300">
+                  Téléphone
+                </label>
+                <input
+                  type="tel"
+                  name="phone"
+                  id="phone"
+                  required
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full rounded-md border-gray-600 bg-dark-300 text-white shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-300">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  id="email"
+                  required
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full rounded-md border-gray-600 bg-dark-300 text-white shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Choix du forfait et de la chambre */}
+          <div className="space-y-4">
+            <h3 className="text-xl font-semibold text-yellow-light">Choix du forfait</h3>
+            
+            <div>
+              <label htmlFor="package" className="block text-sm font-medium text-gray-300">
+                Forfait
               </label>
               <select
-                id="package"
                 name="package"
-                value={formData.package}
-                onChange={handleChange}
+                id="package"
                 required
-                className="w-full px-4 py-2 bg-dark-100 border border-gray-600 rounded-md focus:ring-primary focus:border-primary text-white"
+                value={formData.package}
+                onChange={handleInputChange}
+                className="mt-1 block w-full rounded-md border-gray-600 bg-dark-300 text-white shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
               >
                 <option value="">Sélectionnez un forfait</option>
                 {packages.map(pkg => (
@@ -138,200 +294,126 @@ const Booking: React.FC = () => {
               </select>
             </div>
 
-            {/* Type de Chambre */}
             <div>
-              <label htmlFor="roomType" className="block text-sm font-medium text-yellow-light mb-1">
-                Type de Chambre
+              <label htmlFor="roomType" className="block text-sm font-medium text-gray-300">
+                Type de chambre
               </label>
               <select
-                id="roomType"
                 name="roomType"
-                value={formData.roomType}
-                onChange={handleChange}
+                id="roomType"
                 required
-                className="w-full px-4 py-2 bg-dark-100 border border-gray-600 rounded-md focus:ring-primary focus:border-primary text-white"
+                value={formData.roomType}
+                onChange={handleInputChange}
+                className="mt-1 block w-full rounded-md border-gray-600 bg-dark-300 text-white shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
               >
-                <option value="">Sélectionnez le type de chambre</option>
+                <option value="">Sélectionnez un type de chambre</option>
                 {roomTypes.map(room => (
                   <option key={room.id} value={room.id}>
-                    {room.name} ({room.description})
+                    {room.name} - {room.description}
                   </option>
                 ))}
               </select>
             </div>
 
-            {/* Prix Total */}
             {totalPrice && (
-              <div className="mt-4 p-4 bg-dark-100 border border-primary rounded-md">
-                <p className="text-lg font-semibold text-primary text-center">
-                  Prix Total: {totalPrice}
+              <div className="mt-4 p-4 bg-dark-300 rounded-md">
+                <p className="text-lg font-semibold text-yellow-light">
+                  Prix total: {totalPrice}€
                 </p>
               </div>
             )}
+          </div>
 
-            {/* Prénom */}
-            <div>
-              <label htmlFor="firstName" className="block text-sm font-medium text-yellow-light mb-1">
-                Prénom
-              </label>
-              <input
-                type="text"
-                id="firstName"
-                name="firstName"
-                value={formData.firstName}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 bg-dark-100 border border-gray-600 rounded-md focus:ring-primary focus:border-primary text-white"
-              />
-            </div>
+          {/* Boutons de soumission et retour */}
+          <div className="mt-8 grid grid-cols-2 gap-4">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className={`w-full py-3 px-4 border border-transparent rounded-md shadow-sm text-white text-lg font-medium transition-all duration-200 ${
+                isSubmitting
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-yellow-500 hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transform hover:scale-105'
+              }`}
+            >
+              {isSubmitting ? (
+                <span className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Envoi en cours...
+                </span>
+              ) : (
+                'Réserver maintenant'
+              )}
+            </button>
 
-            {/* Nom */}
-            <div>
-              <label htmlFor="lastName" className="block text-sm font-medium text-yellow-light mb-1">
-                Nom
-              </label>
-              <input
-                type="text"
-                id="lastName"
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 bg-dark-100 border border-gray-600 rounded-md focus:ring-primary focus:border-primary text-white"
-              />
-            </div>
+            <button
+              type="button"
+              onClick={() => navigate('/')}
+              className="w-full py-3 px-4 border-2 border-yellow-500 rounded-md shadow-sm text-yellow-500 text-lg font-medium bg-transparent hover:bg-yellow-500 hover:text-white transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
+            >
+              Retour à l'accueil
+            </button>
+          </div>
+        </form>
 
-            {/* Adresse */}
-            <div>
-              <label htmlFor="address" className="block text-sm font-medium text-yellow-light mb-1">
-                Adresse
-              </label>
-              <input
-                type="text"
-                id="address"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                className="w-full px-4 py-2 bg-dark-100 border border-gray-600 rounded-md focus:ring-primary focus:border-primary text-white"
-              />
-            </div>
-
-            {/* Genre */}
-            <div>
-              <label htmlFor="gender" className="block text-sm font-medium text-yellow-light mb-1">
-                Genre
-              </label>
-              <select
-                id="gender"
-                name="gender"
-                value={formData.gender}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 bg-dark-100 border border-gray-600 rounded-md focus:ring-primary focus:border-primary text-white"
-              >
-                <option value="">Sélectionnez votre genre</option>
-                <option value="male">Homme</option>
-                <option value="female">Femme</option>
-              </select>
-            </div>
-
-            {/* Âge */}
-            <div>
-              <label htmlFor="age" className="block text-sm font-medium text-yellow-light mb-1">
-                Âge
-              </label>
-              <input
-                type="number"
-                id="age"
-                name="age"
-                value={formData.age}
-                onChange={handleChange}
-                required
-                min="0"
-                max="120"
-                className="w-full px-4 py-2 bg-dark-100 border border-gray-600 rounded-md focus:ring-primary focus:border-primary text-white"
-              />
-            </div>
-
-            {/* Nationalité */}
-            <div>
-              <label htmlFor="nationality" className="block text-sm font-medium text-yellow-light mb-1">
-                Nationalité
-              </label>
-              <input
-                type="text"
-                id="nationality"
-                name="nationality"
-                value={formData.nationality}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 bg-dark-100 border border-gray-600 rounded-md focus:ring-primary focus:border-primary text-white"
-              />
-            </div>
-
-            {/* Téléphone */}
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-yellow-light mb-1">
-                Téléphone
-              </label>
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 bg-dark-100 border border-gray-600 rounded-md focus:ring-primary focus:border-primary text-white"
-              />
-            </div>
-
-            {/* Email */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-yellow-light mb-1">
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 bg-dark-100 border border-gray-600 rounded-md focus:ring-primary focus:border-primary text-white"
-              />
-            </div>
-
-            <div className="pt-4">
+        {/* Messages de statut */}
+        {showSuccess && submitStatus === 'success' && (
+          <div className="fixed top-4 right-4 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded shadow-lg animate-fade-in">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <svg className="h-5 w-5 text-green-500 mr-2" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                  <path d="M5 13l4 4L19 7"></path>
+                </svg>
+                <div>
+                  <p className="font-bold">Réservation envoyée avec succès !</p>
+                  <p className="text-sm">Nous vous contacterons bientôt.</p>
+                </div>
+              </div>
               <button
-                type="submit"
-                disabled={isSubmitting}
-                className={`w-full py-3 px-4 border border-transparent rounded-md shadow-sm text-white text-lg font-medium ${
-                  isSubmitting
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary'
-                }`}
+                onClick={() => setShowSuccess(false)}
+                className="ml-4 text-green-700 hover:text-green-900"
               >
-                {isSubmitting ? 'Envoi en cours...' : 'Envoyer'}
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
             </div>
+          </div>
+        )}
 
-            {submitStatus === 'success' && (
-              <div className="mt-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
-                Votre réservation a été envoyée avec succès ! Nous vous contacterons bientôt.
+        {submitStatus === 'success' && (
+          <div className="mt-6 flex flex-col items-center space-y-4">
+            <p className="text-green-500 text-center">
+              Votre réservation a été enregistrée avec succès !
+            </p>
+            <button
+              onClick={() => navigate('/')}
+              className="px-6 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors duration-200"
+            >
+              Retourner à l'accueil
+            </button>
+          </div>
+        )}
+
+        {submitStatus === 'error' && (
+          <div className="mt-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded animate-fade-in">
+            <div className="flex items-center">
+              <svg className="h-5 w-5 text-red-500 mr-2" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+              </svg>
+              <div>
+                <p className="font-bold">Erreur lors de l'envoi</p>
+                <p className="text-sm">Veuillez réessayer ou nous contacter au +33 7 75 70 24 64</p>
               </div>
-            )}
+            </div>
+          </div>
+        )}
 
-            {submitStatus === 'error' && (
-              <div className="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-                Une erreur est survenue lors de l'envoi. Veuillez réessayer ou nous contacter directement.
-              </div>
-            )}
-          </form>
-
-          <p className="mt-6 text-sm text-gray-400 text-center">
-            Nous traiterons votre demande dans les plus brefs délais.
-          </p>
-        </div>
+        <p className="mt-8 text-sm text-gray-400 text-center">
+          Nous traiterons votre demande dans les plus brefs délais.
+        </p>
       </div>
     </div>
   );
