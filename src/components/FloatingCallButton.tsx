@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { FaPhone, FaWhatsapp, FaTimes } from 'react-icons/fa';
 
 const FloatingCallButton: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const phoneNumber = '+33123456789'; // Remplacez par votre numéro de téléphone
+  const [isExpanded, setIsExpanded] = useState(false);
+  const phoneNumber = '+33775702464';
 
   const handleWhatsAppClick = () => {
-    window.open(`https://wa.me/${phoneNumber.replace('+', '')}`, '_blank');
+    window.open(`https://wa.me/${phoneNumber.replace(/\+/g, '')}`, '_blank');
   };
 
   const handlePhoneClick = () => {
@@ -15,40 +15,41 @@ const FloatingCallButton: React.FC = () => {
 
   return (
     <div className="fixed bottom-6 right-6 z-50">
-      {/* Menu principal */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={`w-16 h-16 rounded-full bg-primary text-dark-100 flex items-center justify-center shadow-lg transform transition-transform duration-300 hover:scale-110 ${
-          isOpen ? 'rotate-45' : ''
-        }`}
-      >
-        {isOpen ? <FaTimes size={24} /> : <FaPhone size={24} />}
-      </button>
-
-      {/* Sous-menu */}
-      <div
-        className={`absolute bottom-20 right-0 flex flex-col gap-4 transition-all duration-300 ${
-          isOpen ? 'opacity-100 transform translate-y-0' : 'opacity-0 pointer-events-none transform translate-y-4'
-        }`}
-      >
-        {/* Bouton WhatsApp */}
+      {isExpanded ? (
+        <div className="flex flex-col gap-4">
+          <button
+            onClick={() => setIsExpanded(false)}
+            className="bg-gray-600 hover:bg-gray-700 text-white rounded-full p-4 shadow-lg transition-all duration-300"
+            aria-label="Fermer le menu d'appel"
+          >
+            <FaTimes className="text-2xl" />
+          </button>
+          
+          <button
+            onClick={handleWhatsAppClick}
+            className="bg-green-500 hover:bg-green-600 text-white rounded-full p-4 shadow-lg transition-all duration-300"
+            aria-label="Ouvrir WhatsApp"
+          >
+            <FaWhatsapp className="text-2xl" />
+          </button>
+          
+          <button
+            onClick={handlePhoneClick}
+            className="bg-blue-500 hover:bg-blue-600 text-white rounded-full p-4 shadow-lg transition-all duration-300"
+            aria-label="Appeler"
+          >
+            <FaPhone className="text-2xl" />
+          </button>
+        </div>
+      ) : (
         <button
-          onClick={handleWhatsAppClick}
-          className="w-12 h-12 rounded-full bg-green-500 text-white flex items-center justify-center shadow-lg transform transition-transform duration-300 hover:scale-110"
-          title="WhatsApp"
+          onClick={() => setIsExpanded(true)}
+          className="bg-primary hover:bg-primary-dark text-dark-100 rounded-full p-4 shadow-lg transition-all duration-300"
+          aria-label="Ouvrir le menu d'appel"
         >
-          <FaWhatsapp size={24} />
+          <FaPhone className="text-2xl" />
         </button>
-
-        {/* Bouton Téléphone */}
-        <button
-          onClick={handlePhoneClick}
-          className="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center shadow-lg transform transition-transform duration-300 hover:scale-110"
-          title="Appeler"
-        >
-          <FaPhone size={20} />
-        </button>
-      </div>
+      )}
     </div>
   );
 };
