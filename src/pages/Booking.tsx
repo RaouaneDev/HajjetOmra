@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const Booking: React.FC = () => {
   const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4VudhVGfJJaENs-ld5N8FefoQHofngmwL-ZwJ2XJ04pO2SW-xZntCHtvzGb4RNiU0/exec';
@@ -12,17 +12,41 @@ const Booking: React.FC = () => {
     nationality: '',
     phone: '',
     email: '',
-    package: ''
+    package: '',
+    roomType: ''
   });
 
+  const [totalPrice, setTotalPrice] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
   const packages = [
-    { id: 'omra-ramadan', name: 'Omra Ramadan - 15 jours', price: '2500€' },
-    { id: 'hajj-confort', name: 'Hajj Confort - 3 semaines', price: '6500€' },
-    { id: 'omra-express', name: 'Omra Express - 10 jours', price: '1800€' }
+    { id: 'omra-ramadan', name: 'Omra Ramadan - 15 jours', price: 2500 },
+    { id: 'hajj-confort', name: 'Hajj Confort - 3 semaines', price: 6500 },
+    { id: 'omra-express', name: 'Omra Express - 10 jours', price: 1800 }
   ];
+
+  const roomTypes = [
+    { id: 'quadruple', name: 'Chambre Quadruple', description: '4 personnes', priceCalculation: (basePrice: number) => basePrice },
+    { id: 'triple', name: 'Chambre Triple', description: '3 personnes', priceCalculation: (basePrice: number) => basePrice + (basePrice * 0.33) },
+    { id: 'double', name: 'Chambre Double', description: '2 personnes', priceCalculation: (basePrice: number) => basePrice + (basePrice * 0.50) }
+  ];
+
+  // Calculer le prix total lorsque le forfait ou le type de chambre change
+  useEffect(() => {
+    if (formData.package && formData.roomType) {
+      const selectedPackage = packages.find(pkg => pkg.id === formData.package);
+      const selectedRoom = roomTypes.find(room => room.id === formData.roomType);
+      
+      if (selectedPackage && selectedRoom) {
+        const basePrice = selectedPackage.price;
+        const finalPrice = selectedRoom.priceCalculation(basePrice);
+        setTotalPrice(`${finalPrice.toFixed(2)}€`);
+      }
+    } else {
+      setTotalPrice('');
+    }
+  }, [formData.package, formData.roomType]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -38,6 +62,7 @@ const Booking: React.FC = () => {
     setSubmitStatus('idle');
     
     const selectedPackage = packages.find(pkg => pkg.id === formData.package);
+    const selectedRoom = roomTypes.find(room => room.id === formData.roomType);
     
     try {
       const urlWithParams = new URL(GOOGLE_SCRIPT_URL);
@@ -51,7 +76,8 @@ const Booking: React.FC = () => {
       urlWithParams.searchParams.append('phone', formData.phone);
       urlWithParams.searchParams.append('email', formData.email);
       urlWithParams.searchParams.append('package', selectedPackage?.name || '');
-      urlWithParams.searchParams.append('price', selectedPackage?.price || '');
+      urlWithParams.searchParams.append('roomType', selectedRoom?.name || '');
+      urlWithParams.searchParams.append('totalPrice', totalPrice);
 
       await fetch(urlWithParams.toString(), {
         method: 'GET',
@@ -70,8 +96,10 @@ const Booking: React.FC = () => {
         nationality: '',
         phone: '',
         email: '',
-        package: ''
+        package: '',
+        roomType: ''
       });
+      setTotalPrice('');
     } catch (error) {
       console.error('Erreur:', error);
       setSubmitStatus('error');
@@ -242,11 +270,42 @@ const Booking: React.FC = () => {
                 <option value="">Sélectionnez un forfait</option>
                 {packages.map(pkg => (
                   <option key={pkg.id} value={pkg.id}>
-                    {pkg.name} - {pkg.price}
+                    {pkg.name} - {pkg.price}€
                   </option>
                 ))}
               </select>
             </div>
+
+            {/* Type de Chambre */}
+            <div>
+              <label htmlFor="roomType" className="block text-sm font-medium text-yellow-light mb-1">
+                Type de Chambre
+              </label>
+              <select
+                id="roomType"
+                name="roomType"
+                value={formData.roomType}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 bg-dark-100 border border-gray-600 rounded-md focus:ring-primary focus:border-primary text-white"
+              >
+                <option value="">Sélectionnez le type de chambre</option>
+                {roomTypes.map(room => (
+                  <option key={room.id} value={room.id}>
+                    {room.name} - {room.description}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Prix Total */}
+            {totalPrice && (
+              <div className="mt-4 p-4 bg-dark-100 border border-primary rounded-md">
+                <p className="text-lg font-semibold text-primary text-center">
+                  Prix Total: {totalPrice}
+                </p>
+              </div>
+            )}
 
             <div className="pt-4">
               <button
