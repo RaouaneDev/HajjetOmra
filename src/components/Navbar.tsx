@@ -8,7 +8,8 @@ const Navbar: React.FC = () => {
   const navigation = [
     { name: 'Accueil', href: '/' },
     { name: 'Nos Forfaits', href: '/packages' },
-    { name: 'Guide Hajj', href: '/guide' },
+    { name: 'Guide Hajj', href: '/guide-hajj' },
+    { name: 'Guide Omra', href: '/guide-omra' },
     { name: 'À Propos', href: '/about' },
     { name: 'Contact', href: '/contact' },
   ];
@@ -25,15 +26,43 @@ const Navbar: React.FC = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8 rtl:space-x-reverse">
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                to={item.href}
-                className="text-gray-700 hover:text-primary transition-colors duration-300"
-              >
-                {item.name}
-              </Link>
-            ))}
+            <Link
+              to="/"
+              className="text-gray-700 hover:text-primary transition-colors duration-300"
+            >
+              Accueil
+            </Link>
+            <Link
+              to="/packages"
+              className="text-gray-700 hover:text-primary transition-colors duration-300"
+            >
+              Nos Forfaits
+            </Link>
+            {/* Menu déroulant pour les guides */}
+            <div className="relative group">
+              <button className="text-gray-700 hover:text-primary flex items-center">
+                Guides
+                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <div className="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                <Link to="/guide-hajj" className="block px-4 py-2 text-gray-800 hover:bg-blue-50">Guide du Hajj</Link>
+                <Link to="/guide-omra" className="block px-4 py-2 text-gray-800 hover:bg-blue-50">Guide de l'Omra</Link>
+              </div>
+            </div>
+            <Link
+              to="/about"
+              className="text-gray-700 hover:text-primary transition-colors duration-300"
+            >
+              À Propos
+            </Link>
+            <Link
+              to="/contact"
+              className="text-gray-700 hover:text-primary transition-colors duration-300"
+            >
+              Contact
+            </Link>
             <Link
               to="/booking"
               className="btn-primary"
@@ -62,16 +91,48 @@ const Navbar: React.FC = () => {
         {isOpen && (
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1">
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className="block px-3 py-2 text-gray-700 hover:text-primary transition-colors duration-300"
-                  onClick={() => setIsOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              ))}
+              <Link
+                to="/"
+                className="block px-3 py-2 text-gray-700 hover:text-primary transition-colors duration-300"
+                onClick={() => setIsOpen(false)}
+              >
+                Accueil
+              </Link>
+              <Link
+                to="/packages"
+                className="block px-3 py-2 text-gray-700 hover:text-primary transition-colors duration-300"
+                onClick={() => setIsOpen(false)}
+              >
+                Nos Forfaits
+              </Link>
+              <Link
+                to="/guide-hajj"
+                className="block px-3 py-2 text-gray-700 hover:text-primary transition-colors duration-300"
+                onClick={() => setIsOpen(false)}
+              >
+                Guide du Hajj
+              </Link>
+              <Link
+                to="/guide-omra"
+                className="block px-3 py-2 text-gray-700 hover:text-primary transition-colors duration-300"
+                onClick={() => setIsOpen(false)}
+              >
+                Guide de l'Omra
+              </Link>
+              <Link
+                to="/about"
+                className="block px-3 py-2 text-gray-700 hover:text-primary transition-colors duration-300"
+                onClick={() => setIsOpen(false)}
+              >
+                À Propos
+              </Link>
+              <Link
+                to="/contact"
+                className="block px-3 py-2 text-gray-700 hover:text-primary transition-colors duration-300"
+                onClick={() => setIsOpen(false)}
+              >
+                Contact
+              </Link>
               <Link
                 to="/booking"
                 className="block px-3 py-2 text-center btn-primary"
