@@ -5,15 +5,6 @@ import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const navigation = [
-    { name: 'Accueil', href: '/' },
-    { name: 'Nos Forfaits', href: '/packages' },
-    { name: 'Guide Hajj', href: '/guide-hajj' },
-    { name: 'Guide Omra', href: '/guide-omra' },
-    { name: 'À Propos', href: '/about' },
-    { name: 'Contact', href: '/contact' },
-  ];
-
   return (
     <nav className="bg-white shadow-md">
       <div className="container-custom">
