@@ -365,6 +365,15 @@ const Booking: React.FC = () => {
                 <p className="text-lg font-semibold text-yellow-light">
                   Prix total: {totalPrice}€
                 </p>
+                <div className="mt-6 bg-blue-50 p-4 rounded-lg">
+                  <p className="text-blue-800 font-medium">
+                    Acompte requis (20%): {Math.ceil(parseInt(totalPrice) * 0.2)}€
+                  </p>
+                  <p className="text-sm text-blue-600 mt-2">
+                    Un acompte minimum de 20% est requis pour confirmer votre réservation. 
+                    Le reste du paiement pourra être effectué selon les modalités convenues avec notre agence.
+                  </p>
+                </div>
               </div>
             )}
           </div>
