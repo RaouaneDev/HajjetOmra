@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import FlipCard from '../components/FlipCard';
+import BookingQRCode from '../components/BookingQRCode';
 
 const Home: React.FC = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -133,6 +134,13 @@ const Home: React.FC = () => {
               Voir tous nos forfaits
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* Section QR Code */}
+      <section className="py-12 bg-gray-50">
+        <div className="container-custom">
+          <BookingQRCode />
         </div>
       </section>
 
