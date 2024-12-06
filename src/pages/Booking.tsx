@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 // Configuration des forfaits
 const packages = [
@@ -18,9 +18,6 @@ const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzYibyVKJiUIL
 
 const Booking: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const packageType = searchParams.get('package') || '';
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
