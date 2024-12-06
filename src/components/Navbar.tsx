@@ -24,7 +24,7 @@ const Navbar: React.FC = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-8 rtl:space-x-reverse">
             {navigation.map((item) => (
               <Link
                 key={item.name}
@@ -43,10 +43,11 @@ const Navbar: React.FC = () => {
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
+          <div className="md:hidden flex items-center space-x-4 rtl:space-x-reverse">
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="text-gray-700 hover:text-primary"
+              aria-label={isOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
             >
               {isOpen ? (
                 <XMarkIcon className="h-6 w-6" />

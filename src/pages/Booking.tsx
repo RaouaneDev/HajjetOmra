@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 // Configuration des forfaits
 const packages = [
@@ -18,7 +18,29 @@ const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzYibyVKJiUIL
 
 const Booking: React.FC = () => {
   const navigate = useNavigate();
-  
+  const { hash } = useLocation();
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 300);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
   // État initial du formulaire
   const initialFormState = {
     firstName: '',
@@ -30,7 +52,8 @@ const Booking: React.FC = () => {
     phone: '',
     email: '',
     package: '',
-    roomType: ''
+    roomType: '',
+    message: ''
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -89,6 +112,7 @@ const Booking: React.FC = () => {
       dataToSend.append('type_chambre', selectedRoom?.name || '');
       dataToSend.append('description_chambre', selectedRoom?.description || '');
       dataToSend.append('prix_total', totalPrice);
+      dataToSend.append('message', formData.message.trim());
 
       // Log pour débogage
       console.log('Données envoyées:', Object.fromEntries(dataToSend));
@@ -115,7 +139,29 @@ const Booking: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-dark-200 py-12 px-4 sm:px-6 lg:px-8">
+    <div id="top" className="min-h-screen bg-dark-200 py-12 px-4 sm:px-6 lg:px-8">
+      {/* Bouton retour en haut */}
+      {showScrollTop && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-6 left-6 bg-blue-600 text-white p-2 rounded-full shadow-xl hover:bg-blue-700 transition-all duration-300 z-50 flex items-center justify-center w-8 h-8 border border-white"
+          aria-label="Retour en haut"
+        >
+          <svg 
+            className="w-4 h-4" 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+            strokeWidth={3}
+          >
+            <path 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              d="M5 10l7-7m0 0l7 7m-7-7v18"
+            />
+          </svg>
+        </button>
+      )}
       <div className="max-w-3xl mx-auto bg-dark-100 rounded-lg shadow-xl p-6 sm:p-8">
         {/* Bouton retour */}
         <button
@@ -324,8 +370,28 @@ const Booking: React.FC = () => {
             )}
           </div>
 
-          {/* Boutons de soumission et retour */}
-          <div className="mt-8 grid grid-cols-2 gap-4">
+          {/* Message optionnel */}
+          <div className="mt-12 mb-8">
+            <label htmlFor="message" className="block text-lg font-medium text-gray-700 mb-3">
+              Un message à nous transmettre ?
+            </label>
+            <textarea
+              id="message"
+              name="message"
+              rows={5}
+              className="w-full px-6 py-4 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary resize-none text-gray-700"
+              placeholder="Partagez-nous vos questions ou demandes particulières..."
+              onChange={(e) => {
+                setFormData({
+                  ...formData,
+                  message: e.target.value
+                });
+              }}
+            />
+          </div>
+
+          {/* Bouton de soumission */}
+          <div className="flex justify-center mt-6">
             <button
               type="submit"
               disabled={isSubmitting}
@@ -346,14 +412,6 @@ const Booking: React.FC = () => {
               ) : (
                 'Réserver maintenant'
               )}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => navigate('/')}
-              className="w-full py-3 px-4 border-2 border-yellow-500 rounded-md shadow-sm text-yellow-500 text-lg font-medium bg-transparent hover:bg-yellow-500 hover:text-white transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
-            >
-              Retour à l'accueil
             </button>
           </div>
         </form>
@@ -388,12 +446,12 @@ const Booking: React.FC = () => {
             <p className="text-green-500 text-center">
               Votre réservation a été enregistrée avec succès !
             </p>
-            <button
+            {/* <button
               onClick={() => navigate('/')}
               className="px-6 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors duration-200"
             >
               Retourner à l'accueil
-            </button>
+            </button> */}
           </div>
         )}
 
